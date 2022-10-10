@@ -1,0 +1,14 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Watchlist</h2>
+
+<ul class="nav">
+    {% for auction in auctions %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'auction' auction.id %}">{{auction.title}}</a>
+            </li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

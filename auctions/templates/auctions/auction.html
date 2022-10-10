@@ -1,0 +1,139 @@
+{% extends "auctions/layout.html" %}
+
+{% block title %}{{ auction.title }}{% endblock %}
+
+{% block body %}
+<h1 class='h3 mb-4 text-gray-800'>{{ auction.title }}</h1>
+
+    <h6>
+        <span class='text-muted'>
+            Category: <span class='text-primary'>{{ auction.category }}</span>
+        </span> &nbsp; | &nbsp;
+        <span class='text-muted'>
+            Listed by: <span class='text-primary'>{{ auction.author }}</span>
+        </span> &nbsp; | &nbsp;
+        <span class='text-muted'>Created on {{ auction.created }}</span>
+    </h6>
+{% if user.is_authenticated %}
+    <div>
+        <a class='btn btn-outline-success mt-auto' href="{% url 'watchlist_edit' auction.id 'auction' %}">
+            {% if auction.is_watched %}
+                Remove from Watchlist
+            {% else %}
+                Add to Watchlist
+            {% endif %}
+        </a>
+    </div>
+{% endif %}
+    <br>
+<br>
+{% if auction.imageURL %}
+    <img src="{{ auction.imageURL }}" alt='Product' style='width: 300px;'>
+{% else %}
+    <img src="https://image.shutterstock.com/image-vector/no-image-available-vector-hand-260nw-745639717.jpg" alt="NoImage" style="width:100px;"
+{% endif %}
+
+<br><p>{{ auction.description }}</p>
+
+{% if auction.active %}
+
+    <h4 class='fw-bolder'>
+        {% if auction.current_bid %}
+          Current price:<strong> &dollar;{{auction.current_bid}}</strong>
+        {% else %}
+            Starting price:<strong> &dollar;{{auction.starting_bid}}</strong>
+        {% endif %}
+    </h4>
+
+{% endif %}
+
+{% if user.is_authenticated %}
+
+{% if auction.author == user and auction.active %}
+<div class='card-body'>
+                        <a class='btn btn-danger mt-auto' href="{% url 'auction_close' auction.id %}">
+                            Close auction
+                        </a>
+</div>
+{% endif %}
+
+{% if auction.author != user and auction.active %}
+
+{% if error_min_value %}
+    <p>
+        {% if auction.current_bid %}
+            <div class='alert alert-warning' role='alert'>
+                Your bid must be greater than <strong>&dollar;{{ auction.current_bid|default:auction.starting_bid }}</strong>.
+            </div>
+        {% else %}
+            <div class='alert alert-warning' role='alert'>
+                Your bid must be greater than or equal to <strong>&dollar;{{ auction.current_bid|default:auction.starting_bid }}</strong>.
+            </div>
+        {% endif %}
+    </p>
+{% endif %}
+
+<div class='form-group'>
+    <form action="{% url 'auction_bid' auction.id %}" method='POST'>
+        {% csrf_token %}
+    <div class="form-group">
+        {{ bid_form }}
+    <br>
+    <button type='submit' class='btn btn-primary'>
+        Place a bid
+    </button>
+    </div>
+    </form>
+</div>
+{% endif %}
+{% endif %}
+
+{% if auction.active == False and auction.buyer is not None %}
+
+{% if auction.author == user %}
+<div class='alert alert-success' role='alert'>
+    The item sold to <strong>{{ auction.buyer }}</strong> for <strong>&euro;{{ auction.current_bid }}</strong>.
+</div>
+{% elif auction.buyer == user %}
+<div class='alert alert-success' role='alert'>
+    Congratulations! Your bid <strong>&euro;{{ auction.current_bid }}</strong> was the winning one.
+</div>
+{% else %}
+<div class='alert alert-warning' role='alert'>
+    This item has already been sold.
+</div>
+{% endif %}
+
+{% endif %}
+
+{% if auction.active %}
+{% if user.is_authenticated %}
+<div>
+    <form action="{% url 'comment' auction.id %}" method='POST'>
+        {% csrf_token %}
+        <div class='form-group'>
+            {{ comment_form }}
+            <br>
+            <button type='submit' class='btn btn-success'>
+                Add a comment
+            </button>
+            <a href="{% url 'index' %}" class='btn btn-secondary'>
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endif %}
+{% for comment in comments %}
+<div>
+    <div class='text-muted'>
+        <strong>{{ comment.user|default:"Unknown" }}</strong> commented on {{ comment.date_created }}
+    </div>
+</div>
+<div>
+    <p>{{ comment.comment }}</p>
+</div>
+{% endfor %}
+{% endif %}
+
+{% endblock %}
