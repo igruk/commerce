@@ -5,12 +5,12 @@ from .models import Auction, Bid, Comment
 class AuctionForm(forms.ModelForm):
     class Meta:
         model = Auction
-        fields = ['title', 'description', 'starting_bid', 'imageURL', 'category']
+        fields = ['title', 'description', 'starting_bid', 'image', 'category']
         widgets = {
             'title': forms.TextInput(attrs={'placeholder': 'Enter name', 'class': "form-control"}),
             'description': forms.Textarea(attrs={'placeholder': 'Enter description', 'class': "form-control", 'rows': 5}),
             'starting_bid': forms.NumberInput(attrs={'placeholder': 'Enter price', 'class': "form-control"}),
-            'imageURL': forms.TextInput(attrs={'placeholder': 'Enter image URL', 'class': "form-control"}),
+            # 'image': forms.TextInput(attrs={'placeholder': 'Enter image URL', 'class': "form-control"}),
             'category': forms.Select(attrs={'class': "form-select"})
         }
 

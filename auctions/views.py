@@ -71,7 +71,7 @@ def register(request):
 @login_required
 def new(request):
     if request.method == 'POST':
-        form = AuctionForm(request.POST)
+        form = AuctionForm(request.POST, request.FILES)
         if form.is_valid():
             new_auction = form.save(commit=False)
             new_auction.author = request.user

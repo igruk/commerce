@@ -5,13 +5,17 @@
 {% block body %}
     <h2>Create New Auction</h2>
 
-<form action="{% url 'new' %}" method="post">
+<form action="{% url 'new' %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
+
+    <div class="form-error">{{ form.non_field_errors }}</div>
+
 {% for f in form %}
 <div class="mb-3">
     <label for="{{ f.id_for_label }}">{{f.label}}: </label>
     {{ f }}
 </div>
+    <div class="form-error">{{ f.errors }}</div>
 {% endfor %}
     <button class="btn btn-primary" type="submit">Save</button>
 </form>

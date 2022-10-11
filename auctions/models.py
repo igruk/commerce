@@ -23,7 +23,7 @@ class Auction(models.Model):
     starting_bid = models.DecimalField(max_digits=7, decimal_places=2, validators=[MinValueValidator(0.01)])
     current_bid = models.DecimalField(max_digits=7, decimal_places=2, validators=[MinValueValidator(0.01)], blank=True,
                                       null=True)
-    imageURL = models.URLField(blank=True)
+    image = models.ImageField(upload_to='images/')
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='categories')
     active = models.BooleanField(default=True)
     created = models.DateTimeField(default=timezone.now)
