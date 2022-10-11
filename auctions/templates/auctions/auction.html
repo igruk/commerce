@@ -1,4 +1,5 @@
 {% extends "auctions/layout.html" %}
+{% load static %}
 
 {% block title %}{{ auction.title }}{% endblock %}
 
@@ -27,8 +28,8 @@
 {% endif %}
     <br>
 <br>
-{% if auction.imageURL %}
-    <img src="{{ auction.imageURL }}" alt='Product' style='width: 300px;'>
+{% if auction.image %}
+    <img src="{{ auction.image.url }}" alt='Product' style='width: 300px;'>
 {% else %}
     <img src="https://image.shutterstock.com/image-vector/no-image-available-vector-hand-260nw-745639717.jpg" alt="NoImage" style="width:100px;"
 {% endif %}

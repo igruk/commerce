@@ -6,9 +6,9 @@
 <ul class="nav">
     {% for auction in auctions %}
     <div>
-        {% if auction.imageURL %}
+        {% if auction.image %}
         <p style="text-align:center;">
-            <img src="{{ auction.imageURL }}" alt='Product' style='width: 100px;'>
+            <img src="{{ auction.image.url }}" alt='Product' style='width: 100px;'>
         </p>
         {% else %}
         <p style="text-align:center;">
