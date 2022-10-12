@@ -89,22 +89,26 @@
 {% endif %}
 {% endif %}
 
-{% if auction.active == False and auction.buyer is not None %}
-
-{% if auction.author == user %}
-<div class='alert alert-success' role='alert'>
-    The item sold to <strong>{{ auction.buyer }}</strong> for <strong>&euro;{{ auction.current_bid }}</strong>.
-</div>
-{% elif auction.buyer == user %}
-<div class='alert alert-success' role='alert'>
-    Congratulations! Your bid <strong>&euro;{{ auction.current_bid }}</strong> was the winning one.
-</div>
-{% else %}
-<div class='alert alert-warning' role='alert'>
-    This item has already been sold.
-</div>
-{% endif %}
-
+{% if auction.active == False %}
+    {% if auction.buyer %}
+        {% if auction.author == user %}
+        <div class='alert alert-success' role='alert'>
+            The item sold to <strong>{{ auction.buyer }}</strong> for <strong>&dollar;{{ auction.current_bid }}</strong>.
+        </div>
+        {% elif auction.buyer == user %}
+        <div class='alert alert-success' role='alert'>
+            Congratulations! Your bid <strong>&dollar;{{ auction.current_bid }}</strong> was the winning one.
+        </div>
+        {% else %}
+        <div class='alert alert-warning' role='alert'>
+            This item has already been sold.
+        </div>
+        {% endif %}
+    {% else %}
+        <div class='alert alert-warning' role='alert'>
+            Auction closed.
+        </div>
+    {% endif %}
 {% endif %}
 
 {% if auction.active %}

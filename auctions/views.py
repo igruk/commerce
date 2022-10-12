@@ -177,7 +177,8 @@ def auction_close(request, auction_id):
 
     if request.user == auction.author:
         auction.active = False
-        auction.buyer = Bid.objects.filter(auction=auction).last().user
+        if auction.current_bid:
+            auction.buyer = Bid.objects.filter(auction=auction).last().user
         auction.save()
         return HttpResponseRedirect(reverse('auction', args=[auction_id]))
     else:
