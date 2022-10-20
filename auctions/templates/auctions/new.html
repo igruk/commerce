@@ -1,22 +1,23 @@
 {% extends "auctions/layout.html" %}
-
+{% load static %}
 {% block title %}New Auction{% endblock %}
 
 {% block body %}
+<h2 class="title">Create New Auction</h2>
+<div class="new-form">
+    <form action="{% url 'new' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
 
-<form action="{% url 'new' %}" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
+        <div class="form-error">{{ form.non_field_errors }}</div>
 
-    <div class="form-error">{{ form.non_field_errors }}</div>
-
-{% for f in form %}
-<div class="mb-3">
-    <label for="{{ f.id_for_label }}">{{f.label}}: </label>
-    {{ f }}
+    {% for f in form %}
+    <div class="mb-3">
+        <label for="{{ f.id_for_label }}">{{f.label}}: </label>
+        {{ f }}
+    </div>
+        <div class="form-error">{{ f.errors }}</div>
+    {% endfor %}
+        <button style="margin-left: auto;" class="btn btn-primary btn-block" type="submit">Save</button>
+    </form>
 </div>
-    <div class="form-error">{{ f.errors }}</div>
-{% endfor %}
-    <button class="btn btn-primary" type="submit">Save</button>
-</form>
-
 {% endblock %}

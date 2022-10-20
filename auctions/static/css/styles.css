@@ -134,3 +134,17 @@ img {
       /* width: calc(33% - 1em); */
     }
   } /* mq 60em*/
+
+  .new-form {
+    margin: 20px auto 0 auto;
+    width: 400px;
+  }
+
+  .message {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20px;
+    text-align:center;
+    color: red;
+}

@@ -32,10 +32,15 @@ def login_view(request):
             return HttpResponseRedirect(reverse("index"))
         else:
             return render(request, "auctions/login.html", {
-                "message": "Invalid username and/or password."
+                "message": "Invalid username and/or password.",
+                'categories': Category.objects.all(),
+                'title': 'Log in'
             })
     else:
-        return render(request, "auctions/login.html")
+        return render(request, "auctions/login.html", {
+            'categories': Category.objects.all(),
+            'title': 'Log in'
+        })
 
 
 def logout_view(request):
@@ -53,7 +58,9 @@ def register(request):
         confirmation = request.POST["confirmation"]
         if password != confirmation:
             return render(request, "auctions/register.html", {
-                "message": "Passwords must match."
+                "message": "Passwords must match.",
+                'categories': Category.objects.all(),
+                'title': 'Register'
             })
 
         # Attempt to create new user
@@ -62,12 +69,17 @@ def register(request):
             user.save()
         except IntegrityError:
             return render(request, "auctions/register.html", {
-                "message": "Username already taken."
+                "message": "Username already taken.",
+                'categories': Category.objects.all(),
+                'title': 'Register'
             })
         login(request, user)
         return HttpResponseRedirect(reverse("index"))
     else:
-        return render(request, "auctions/register.html")
+        return render(request, "auctions/register.html", {
+            'categories': Category.objects.all(),
+            'title': 'Register'
+        })
 
 
 @login_required
@@ -85,7 +97,8 @@ def new(request):
             })
     else:
         return render(request, "auctions/new.html", {
-            'form': AuctionForm()
+            'form': AuctionForm(),
+            'categories': Category.objects.all(),
         })
 
 
@@ -107,7 +120,8 @@ def auction_page(request, auction_id):
         'auction': auction,
         'bid_form': BidForm(),
         'comments': auction.get_comments.all(),
-        'comment_form': CommentForm()
+        'comment_form': CommentForm(),
+        'categories': Category.objects.all(),
     })
 
 
@@ -140,6 +154,7 @@ def category_view(request, category_name):
 
     return render(request, "auctions/index.html", {
         'auctions': auctions,
+        'categories': Category.objects.all(),
         'title': category_name,
     })
 
