@@ -3,7 +3,6 @@
 {% block title %}New Auction{% endblock %}
 
 {% block body %}
-    <h2>Create New Auction</h2>
 
 <form action="{% url 'new' %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}

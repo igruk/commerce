@@ -13,6 +13,8 @@ from .models import User, Category, Auction
 def index(request):
     return render(request, "auctions/index.html", {
         'auctions': Auction.objects.filter(active=True),
+        'categories': Category.objects.all(),
+        'title': 'Active Listings'
     })
 
 
@@ -136,8 +138,9 @@ def category_view(request, category_name):
     category = Category.objects.get(category_name=category_name)
     auctions = Auction.objects.filter(category=category, active=True)
 
-    return render(request, "auctions/category_view.html", {
+    return render(request, "auctions/index.html", {
         'auctions': auctions,
+        'title': category_name,
     })
 
 
@@ -153,6 +156,8 @@ def watchlist(request):
 
     return render(request, "auctions/index.html", {
         'auctions': auctions,
+        'categories': Category.objects.all(),
+        'title': 'Watchlist',
     })
 
 
