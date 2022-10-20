@@ -1,3 +1,56 @@
-body {
-    padding: 10px;
+
+.login {
+    text-align: right;
 }
+
+.btn {
+    margin-left: 20px;
+}
+
+.title {
+    margin-top: 20px;
+    text-align:center;
+    color: indigo;
+}
+
+.nav-link {
+    color: black;
+}
+
+.navbar .nav {
+    display: flex;
+    float: none;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+.input-group {
+    margin-left: auto;
+    margin-right: auto;
+    width: 400px;
+}
+
+header {
+    background-color: aqua;
+    padding: 20px;
+    box-shadow: 3px 3px 8px hsl(0, 0%, 70%);
+}
+
+/*
+:root {
+    --color1: #05b1b1;
+    --color2: #52339a;
+}
+
+header {
+    background: var(--color1);
+    background: -moz-linear-gradient(left, var(--color1) 0%, var(--color2) 100%);
+    background: -webkit-linear-gradient(left, var(--color1) 0%, var(--color2) 100%);
+    background: linear-gradient(to right, var(--color1) 0%, var(--color2) 100%);
+}
+*/
+
+body {
+    background: #ecf0f1;
+  }
