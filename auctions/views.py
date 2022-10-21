@@ -95,6 +95,12 @@ def new(request):
             return render(request, 'auctions/auction.html', {
                 'auction': auction,
             })
+        else:
+            return render(request, "auctions/new.html", {
+                'message': 'Not valid data',
+                'form': AuctionForm(),
+                'categories': Category.objects.all(),
+            })
     else:
         return render(request, "auctions/new.html", {
             'form': AuctionForm(),

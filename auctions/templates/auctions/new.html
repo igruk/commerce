@@ -4,6 +4,9 @@
 
 {% block body %}
 <h2 class="title">Create New Auction</h2>
+{% if message %}
+        <div class="message">{{ message }}</div>
+    {% endif %}
 <div class="new-form">
     <form action="{% url 'new' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
