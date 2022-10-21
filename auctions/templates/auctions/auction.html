@@ -4,9 +4,10 @@
 {% block title %}{{ auction.title }}{% endblock %}
 
 {% block body %}
-<h1 class='h3 mb-4 text-gray-800'>{{ auction.title }}</h1>
 
-    <h6>
+<h2 class="title">{{ auction.title }}</h2>
+
+    <h6 class="centered">
         <span class='text-muted'>
             Category: <span class='text-primary'>{{ auction.category }}</span>
         </span> &nbsp; | &nbsp;
@@ -15,9 +16,10 @@
         </span> &nbsp; | &nbsp;
         <span class='text-muted'>Created on {{ auction.created }}</span>
     </h6>
+
 {% if user.is_authenticated %}
-    <div>
-        <a class='btn btn-outline-success mt-auto' href="{% url 'watchlist_edit' auction.id 'auction' %}">
+    <div  class="watchlist-button">
+        <a style="margin-left: auto; " class='btn btn-outline-success mt-auto btn-block' href="{% url 'watchlist_edit' auction.id 'auction' %}">
             {% if auction.is_watched %}
                 Remove from Watchlist
             {% else %}
@@ -26,68 +28,89 @@
         </a>
     </div>
 {% endif %}
-    <br>
 <br>
+<br>
+
+<div class="img-product">
 {% if auction.image %}
-    <img src="{{ auction.image.url }}" alt='Product' style='width: 300px;'>
+    <img src="{{ auction.image.url }}" alt='Product'>
 {% else %}
-    <img src="https://image.shutterstock.com/image-vector/no-image-available-vector-hand-260nw-745639717.jpg" alt="NoImage" style="width:100px;"
+    <img src="https://image.shutterstock.com/image-vector/no-image-available-vector-hand-260nw-745639717.jpg" alt="NoImage" style="width:300px;"
 {% endif %}
-
-<br><p>{{ auction.description }}</p>
-
-{% if auction.active %}
-
-    <h4 class='fw-bolder'>
-        {% if auction.current_bid %}
-          Current price:<strong> &dollar;{{auction.current_bid}}</strong>
-        {% else %}
-            Starting price:<strong> &dollar;{{auction.starting_bid}}</strong>
-        {% endif %}
-    </h4>
-
-{% endif %}
-
-{% if user.is_authenticated %}
-
-{% if auction.author == user and auction.active %}
-<div class='card-body'>
-                        <a class='btn btn-danger mt-auto' href="{% url 'auction_close' auction.id %}">
-                            Close auction
-                        </a>
+<h4 style="margin-top: 20px;">{{ auction.description }}</h4>
 </div>
-{% endif %}
 
-{% if auction.author != user and auction.active %}
-
-{% if error_min_value %}
-    <p>
-        {% if auction.current_bid %}
-            <div class='alert alert-warning' role='alert'>
-                Your bid must be greater than <strong>&dollar;{{ auction.current_bid|default:auction.starting_bid }}</strong>.
-            </div>
-        {% else %}
-            <div class='alert alert-warning' role='alert'>
-                Your bid must be greater than or equal to <strong>&dollar;{{ auction.current_bid|default:auction.starting_bid }}</strong>.
-            </div>
-        {% endif %}
-    </p>
-{% endif %}
-
-<div class='form-group'>
-    <form action="{% url 'auction_bid' auction.id %}" method='POST'>
-        {% csrf_token %}
-    <div class="form-group">
-        {{ bid_form }}
-    <br>
-    <button type='submit' class='btn btn-primary'>
-        Place a bid
-    </button>
+{% if comments %}
+<div class="comments">
+<h4 class='fw-bolder'>
+    Comments
+</h4>
+{% for comment in comments %}
+    <div>
+        <div class='text-muted'>
+            <strong>{{ comment.user|default:"Unknown" }}</strong> commented on {{ comment.created }}
+        </div>
     </div>
-    </form>
+    <div>
+        <p>{{ comment.comment }}</p>
+    </div>
+{% endfor %}
 </div>
 {% endif %}
-{% endif %}
+
+<div class="new-form">
+    {% if auction.active %}
+
+        <h4 class='fw-bolder'>
+            {% if auction.current_bid %}
+            Current price:<strong> &dollar;{{auction.current_bid}}</strong>
+            {% else %}
+                Starting price:<strong> &dollar;{{auction.starting_bid}}</strong>
+            {% endif %}
+        </h4>
+
+    {% endif %}
+
+    {% if user.is_authenticated %}
+
+        {% if auction.author == user and auction.active %}
+        <div class='card-body'>
+            <a class='btn btn-danger mt-auto' href="{% url 'auction_close' auction.id %}">
+                Close auction
+            </a>
+        </div>
+        {% endif %}
+
+    {% if auction.author != user and auction.active %}
+
+        {% if error_min_value %}
+            <p>
+                {% if auction.current_bid %}
+                    <div class='alert alert-warning' role='alert'>
+                        Your bid must be greater than <strong>&dollar;{{ auction.current_bid|default:auction.starting_bid }}</strong>.
+                    </div>
+                {% else %}
+                    <div class='alert alert-warning' role='alert'>
+                        Your bid must be greater than or equal to <strong>&dollar;{{ auction.current_bid|default:auction.starting_bid }}</strong>.
+                    </div>
+                {% endif %}
+            </p>
+        {% endif %}
+
+    <div class='form-group'>
+        <form action="{% url 'auction_bid' auction.id %}" method='POST'>
+            {% csrf_token %}
+        <div class="form-group">
+            {{ bid_form }}
+        <br>
+        <button type='submit' class='btn btn-primary'>
+            Place a bid
+        </button>
+        </div>
+        </form>
+    </div>
+    {% endif %}
+    {% endif %}
 
 {% if auction.active == False %}
     {% if auction.buyer %}
@@ -97,7 +120,7 @@
         </div>
         {% elif auction.buyer == user %}
         <div class='alert alert-success' role='alert'>
-            Congratulations! Your bid <strong>&dollar;{{ auction.current_bid }}</strong> was the winning one.
+            Congratulations! <br>Your bid <strong>&dollar;{{ auction.current_bid }}</strong> was the winning one.
         </div>
         {% else %}
         <div class='alert alert-warning' role='alert'>
@@ -110,35 +133,35 @@
         </div>
     {% endif %}
 {% endif %}
-
+</div>
+<br>
+<br>
+<br>
 {% if auction.active %}
-{% if user.is_authenticated %}
-<div>
-    <form action="{% url 'comment' auction.id %}" method='POST'>
-        {% csrf_token %}
-        <div class='form-group'>
-            {{ comment_form }}
-            <br>
-            <button type='submit' class='btn btn-success'>
+    {% if user.is_authenticated %}
+        <div class="new-form">
+            <h4 class='fw-bolder'>
                 Add a comment
-            </button>
-            <a href="{% url 'index' %}" class='btn btn-secondary'>
-                Cancel
-            </a>
+            </h4>
+            <div class="form-group">
+                <form action="{% url 'comment' auction.id %}" method='POST'>
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        {{ comment_form }}
+                        <br>
+                        <button type='submit' class='btn btn-success'>
+                            Add a comment
+                        </button>
+                        <a href="{% url 'auction' auction.id %}" class='btn btn-secondary'>
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+    {% endif %}
         </div>
-    </form>
-</div>
+
 {% endif %}
-{% for comment in comments %}
-<div>
-    <div class='text-muted'>
-        <strong>{{ comment.user|default:"Unknown" }}</strong> commented on {{ comment.date_created }}
-    </div>
-</div>
-<div>
-    <p>{{ comment.comment }}</p>
-</div>
-{% endfor %}
-{% endif %}
+
 
 {% endblock %}

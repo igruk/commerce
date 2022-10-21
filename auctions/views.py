@@ -136,6 +136,8 @@ def auction_bid(request, auction_id):
         new_bid = form.save(commit=False)
         new_bid.auction = auction
         new_bid.user = request.user
+        if request.user not in auction.watchers.all():
+            auction.watchers.add(request.user)
         new_bid.save()
         auction.save()
 
