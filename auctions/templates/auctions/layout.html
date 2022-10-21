@@ -57,8 +57,10 @@
                 </div>
             </nav>
             <div class="input-group">
-                <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
-                <button type="button" class="btn btn-outline-primary">Search</button>
+                <form class="input-group" action="{% url 'search' %}" method="get">
+                    <input type="search" name="q" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
+                    <button type="submit" class="btn btn-outline-primary">Search</button>
+                </form>
             </div>
         </header>
         <h2 class="title">{{ title }}</h2>

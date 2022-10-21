@@ -16,4 +16,5 @@ urlpatterns = [
     path("watchlist", views.watchlist, name="watchlist"),
     path("watchlist/<int:auction_id>/edit/<str:reverse_method>", views.watchlist_edit, name='watchlist_edit'),
     path('auction/<str:auction_id>/comment', views.comment, name='comment'),
+    path("search", views.search, name="search"),
 ]

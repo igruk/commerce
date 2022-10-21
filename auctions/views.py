@@ -217,3 +217,16 @@ def comment(request, auction_id):
     new_comment.auction = auction
     new_comment.save()
     return HttpResponseRedirect(reverse('auction', args=[auction_id]))
+
+
+def search(request):
+    query = request.GET.get('q')
+    auctions = Auction.objects.filter(title__icontains=query)
+    print(auctions)
+
+
+    return render(request, "auctions/index.html", {
+        'auctions': auctions,
+        'categories': Category.objects.all(),
+        'title': 'Search Results'
+    })
