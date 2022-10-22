@@ -64,9 +64,23 @@
                 </form>
             </div>
         </header>
+
         <h2 class="title">{{ title }}</h2>
+
         {% block body %}
         {% endblock %}
+
+        <footer class='sticky-footer bg-light'>
+            <div class='container my-auto'>
+                <div class='copyright text-center my-auto'>
+                    <span>
+                        &copy; igruk
+                    </span>
+                    <a style="margin: 0 10px;" href="https://github.com/igruk">GitHub</a>
+                    <a href="https://www.linkedin.com/">LinkedIn</a>
+                </div>
+            </div>
+        </footer>
     </body>
 
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
