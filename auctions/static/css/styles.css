@@ -40,20 +40,6 @@ header {
     box-shadow: 3px 3px 8px hsl(0, 0%, 70%);
 }
 
-/*
-:root {
-    --color1: #05b1b1;
-    --color2: #52339a;
-}
-
-header {
-    background: var(--color1);
-    background: -moz-linear-gradient(left, var(--color1) 0%, var(--color2) 100%);
-    background: -webkit-linear-gradient(left, var(--color1) 0%, var(--color2) 100%);
-    background: linear-gradient(to right, var(--color1) 0%, var(--color2) 100%);
-}
-*/
-
 body {
     background: #ecf0f1;
   }
