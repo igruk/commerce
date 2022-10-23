@@ -113,9 +113,8 @@ img {
     margin-bottom: 1em;
     display: flex;
     flex: 0 1 calc(50% - 0.5em);
-    /* width: calc(50% - 1em); */
   }
-  } /* mq 40em*/
+  } 
   
 @media screen and (min-width: 60em) {
   .cards {
@@ -126,9 +125,8 @@ img {
     margin-bottom: 2em;
     display: flex;
     flex: 0 1 calc(33% - 0.5em);
-    /* width: calc(33% - 1em); */
   }
-  } /* mq 60em*/
+  } 
 
 .watchlist-button {
   margin: 20px auto 0 auto;
