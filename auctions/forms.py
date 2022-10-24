@@ -8,9 +8,9 @@ class AuctionForm(forms.ModelForm):
         fields = ['title', 'description', 'starting_bid', 'image', 'category']
         widgets = {
             'title': forms.TextInput(attrs={'placeholder': 'Enter name', 'class': "form-control"}),
-            'description': forms.Textarea(attrs={'placeholder': 'Enter description', 'class': "form-control", 'rows': 5}),
+            'description': forms.Textarea(
+                attrs={'placeholder': 'Enter description', 'class': "form-control", 'rows': 5}),
             'starting_bid': forms.NumberInput(attrs={'placeholder': 'Enter price', 'class': "form-control"}),
-            # 'image': forms.TextInput(attrs={'placeholder': 'Enter image URL', 'class': "form-control"}),
             'category': forms.Select(attrs={'class': "form-select"})
         }
 
@@ -24,7 +24,7 @@ class BidForm(forms.ModelForm):
         model = Bid
         fields = ['amount']
         widgets = {
-            'amount': forms.NumberInput(attrs={'placeholder': 'Enter bid', 'class': "form-control"},),
+            'amount': forms.NumberInput(attrs={'placeholder': 'Enter bid', 'class': "form-control"}, ),
         }
 
 

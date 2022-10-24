@@ -11,6 +11,7 @@ class User(AbstractUser):
 
 class Category(models.Model):
     category_name = models.CharField(max_length=50, db_index=True)
+    objects = models.Manager
 
     def __str__(self):
         return f'{self.category_name}'
@@ -29,6 +30,7 @@ class Auction(models.Model):
     created = models.DateTimeField(default=timezone.now)
     watchers = models.ManyToManyField(User, related_name='watchlist', blank=True)
     buyer = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
+    objects = models.Manager
 
     def __str__(self):
         return f'Auction "{self.title}" by {self.author}'
@@ -38,6 +40,7 @@ class Bid(models.Model):
     auction = models.ForeignKey(Auction, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=7, decimal_places=2)
+    objects = models.Manager
 
     def __str__(self):
         return f'Bid {self.amount} on {self.auction.title} by {self.user.username}'
@@ -49,6 +52,7 @@ class Comment(models.Model):
     comment = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
     active = models.BooleanField(default=True)
+    objects = models.Manager
 
     def __str__(self):
         return f'Comment by {self.user} on {self.auction}'

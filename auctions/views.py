@@ -230,7 +230,6 @@ def search(request):
     auctions = Auction.objects.filter(title__icontains=query)
     print(auctions)
 
-
     return render(request, "auctions/index.html", {
         'auctions': auctions,
         'categories': Category.objects.all(),
