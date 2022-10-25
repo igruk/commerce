@@ -17,7 +17,6 @@ from .models import User, Category, Auction
 #     template_name = 'auctions/index.html'
 #     context_object_name = 'auctions'
 #     extra_context = {
-#         'categories': Category.objects.all(),
 #         'title': 'Active Listings'
 #     }
 #
@@ -27,7 +26,6 @@ from .models import User, Category, Auction
 def index(request):
     return render(request, "auctions/index.html", {
         'auctions': Auction.objects.filter(active=True),
-        'categories': Category.objects.all(),
         'title': 'Active Listings'
     })
 
@@ -47,12 +45,10 @@ def login_view(request):
         else:
             return render(request, "auctions/login.html", {
                 "message": "Invalid username and/or password.",
-                'categories': Category.objects.all(),
                 'title': 'Log in'
             })
     else:
         return render(request, "auctions/login.html", {
-            'categories': Category.objects.all(),
             'title': 'Log in'
         })
 
@@ -73,7 +69,6 @@ def register(request):
         if password != confirmation:
             return render(request, "auctions/register.html", {
                 "message": "Passwords must match.",
-                'categories': Category.objects.all(),
                 'title': 'Register'
             })
 
@@ -84,14 +79,12 @@ def register(request):
         except IntegrityError:
             return render(request, "auctions/register.html", {
                 "message": "Username already taken.",
-                'categories': Category.objects.all(),
                 'title': 'Register'
             })
         login(request, user)
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html", {
-            'categories': Category.objects.all(),
             'title': 'Register'
         })
 
@@ -113,12 +106,10 @@ def new(request):
             return render(request, "auctions/new.html", {
                 'message': 'Not valid data',
                 'form': AuctionForm(),
-                'categories': Category.objects.all(),
             })
     else:
         return render(request, "auctions/new.html", {
             'form': AuctionForm(),
-            'categories': Category.objects.all(),
         })
 
 
@@ -135,7 +126,6 @@ def auction_page(request, auction_id):
         'bid_form': BidForm(),
         'comments': auction.get_comments.all(),
         'comment_form': CommentForm(),
-        'categories': Category.objects.all(),
     })
 
 
@@ -169,7 +159,6 @@ def auction_bid(request, auction_id):
 #     template_name = 'auctions/index.html'
 #     context_object_name = 'categories'
 #     # extra_context = {
-#     #     'categories': Category.objects.all(),
 #     #     'title': 'Active Listings'
 #     # }
 #
@@ -189,7 +178,6 @@ def category_view(request, category_name):
 
     return render(request, "auctions/index.html", {
         'auctions': auctions,
-        'categories': Category.objects.all(),
         'title': category_name,
     })
 
@@ -206,7 +194,6 @@ def watchlist(request):
 
     return render(request, "auctions/index.html", {
         'auctions': auctions,
-        'categories': Category.objects.all(),
         'title': 'Watchlist',
     })
 
@@ -259,6 +246,5 @@ def search(request):
 
     return render(request, "auctions/index.html", {
         'auctions': auctions,
-        'categories': Category.objects.all(),
         'title': 'Search Results'
     })
