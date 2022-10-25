@@ -12,22 +12,23 @@ from .forms import *
 from .models import User, Category, Auction
 
 
-# class AuctionsHome(ListView):
-#     model = Auction
-#     template_name = 'auctions/index.html'
-#     context_object_name = 'auctions'
-#     extra_context = {
-#         'title': 'Active Listings'
-#     }
-#
-#     def get_queryset(self):
-#         return Auction.objects.filter(active=True)
-
-def index(request):
-    return render(request, "auctions/index.html", {
-        'auctions': Auction.objects.filter(active=True),
+class AuctionsHome(ListView):
+    model = Auction
+    template_name = 'auctions/index.html'
+    context_object_name = 'auctions'
+    extra_context = {
         'title': 'Active Listings'
-    })
+    }
+
+    def get_queryset(self):
+        return Auction.objects.filter(active=True)
+
+
+# def index(request):
+#     return render(request, "auctions/index.html", {
+#         'auctions': Auction.objects.filter(active=True),
+#         'title': 'Active Listings'
+#     })
 
 
 def login_view(request):
@@ -154,32 +155,29 @@ def auction_bid(request, auction_id):
         })
 
 
-# class AuctionCategory(ListView):
-#     model = Auction
-#     template_name = 'auctions/index.html'
-#     context_object_name = 'categories'
-#     # extra_context = {
-#     #     'title': 'Active Listings'
-#     # }
+class AuctionCategory(ListView):
+    model = Auction
+    template_name = 'auctions/index.html'
+    context_object_name = 'categories'
+    allow_empty = False
+
+    def get_queryset(self):
+        return Auction.objects.filter(category__category_name=self.kwargs['category_name'], active=True)
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = str(context['categories'][0].category)
+        return context
+
+
+# def category_view(request, category_name):
+#     category = Category.objects.get(category_name=category_name)
+#     auctions = Auction.objects.filter(category=category, active=True)
 #
-#     def get_queryset(self):
-#         return Auction.objects.filter(category__category_name=self.kwargs['category_name'], active=True)
-#
-#     def get_context_data(self, *, object_list=None, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['title'] = str(context['categories'][0].category)
-#         context['categories']: Category.objects.all()
-#         return context
-
-
-def category_view(request, category_name):
-    category = Category.objects.get(category_name=category_name)
-    auctions = Auction.objects.filter(category=category, active=True)
-
-    return render(request, "auctions/index.html", {
-        'auctions': auctions,
-        'title': category_name,
-    })
+#     return render(request, "auctions/index.html", {
+#         'auctions': auctions,
+#         'title': category_name,
+#     })
 
 
 @login_required
