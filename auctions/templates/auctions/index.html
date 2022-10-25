@@ -6,7 +6,7 @@
     <section class="cards">
         {% for auction in auctions %}
             <article class="card">
-                <a href="{% url 'auction' auction.id %}">
+                <a href="{{ auction.get_absolute_url }}">
                 <figure class="thumbnail">
                 {% if auction.image %}
                     <img src="{{ auction.image.url }}" alt='Product'>

@@ -6,9 +6,23 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.views.generic import ListView
+
 from .forms import *
 from .models import User, Category, Auction
 
+
+# class AuctionsHome(ListView):
+#     model = Auction
+#     template_name = 'auctions/index.html'
+#     context_object_name = 'auctions'
+#     extra_context = {
+#         'categories': Category.objects.all(),
+#         'title': 'Active Listings'
+#     }
+#
+#     def get_queryset(self):
+#         return Auction.objects.filter(active=True)
 
 def index(request):
     return render(request, "auctions/index.html", {
@@ -108,12 +122,6 @@ def new(request):
         })
 
 
-def categories(request):
-    return render(request, "auctions/categories.html", {
-        'categories': Category.objects.all(),
-    })
-
-
 def auction_page(request, auction_id):
     auction = Auction.objects.get(id=auction_id)
 
@@ -154,6 +162,25 @@ def auction_bid(request, auction_id):
             'bid_form': BidForm,
             'error_min_value': True,
         })
+
+
+# class AuctionCategory(ListView):
+#     model = Auction
+#     template_name = 'auctions/index.html'
+#     context_object_name = 'categories'
+#     # extra_context = {
+#     #     'categories': Category.objects.all(),
+#     #     'title': 'Active Listings'
+#     # }
+#
+#     def get_queryset(self):
+#         return Auction.objects.filter(category__category_name=self.kwargs['category_name'], active=True)
+#
+#     def get_context_data(self, *, object_list=None, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['title'] = str(context['categories'][0].category)
+#         context['categories']: Category.objects.all()
+#         return context
 
 
 def category_view(request, category_name):

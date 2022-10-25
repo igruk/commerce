@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
 
 
@@ -15,6 +16,9 @@ class Category(models.Model):
 
     def __str__(self):
         return f'{self.category_name}'
+
+    def get_absolute_url(self):
+        return reverse('category_view', kwargs={'category_name': self.category_name})
 
 
 class Auction(models.Model):
@@ -34,6 +38,9 @@ class Auction(models.Model):
 
     def __str__(self):
         return f'Auction "{self.title}" by {self.author}'
+
+    def get_absolute_url(self):
+        return reverse('auction', kwargs={'auction_id': self.pk})
 
 
 class Bid(models.Model):
