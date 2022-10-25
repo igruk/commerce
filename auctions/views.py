@@ -158,7 +158,7 @@ def auction_bid(request, auction_id):
 class AuctionCategory(ListView):
     model = Auction
     template_name = 'auctions/index.html'
-    context_object_name = 'categories'
+    context_object_name = 'auctions'
     allow_empty = False
 
     def get_queryset(self):
@@ -166,7 +166,7 @@ class AuctionCategory(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = str(context['categories'][0].category)
+        context['title'] = str(context['auctions'][0].category)
         return context
 
 
