@@ -180,20 +180,29 @@ class AuctionCategory(ListView):
 #     })
 
 
-@login_required
-def watchlist(request):
-    auctions = request.user.watchlist.all()
+# @login_required
+# def watchlist(request):
+#     auctions = request.user.watchlist.all()
+#
+#     return render(request, "auctions/index.html", {
+#         'auctions': auctions,
+#         'title': 'Watchlist',
+#     })
 
-    for auction in auctions:
-        if request.user in auction.watchers.all():
-            auction.is_watched = True
-        else:
-            auction.is_watched = False
 
-    return render(request, "auctions/index.html", {
-        'auctions': auctions,
-        'title': 'Watchlist',
-    })
+class AuctionWatchlist(ListView):
+    model = Auction
+    template_name = 'auctions/index.html'
+    context_object_name = 'auctions'
+    allow_empty = False
+
+    def get_queryset(self):
+        return self.request.user.watchlist.all()
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Watchlist'
+        return context
 
 
 @login_required
