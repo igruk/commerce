@@ -235,11 +235,13 @@ def watchlist_edit(request, auction_id, reverse_method):
 
     if request.user in auction.watchers.all():
         auction.watchers.remove(request.user)
+        auction.is_watched = False
     else:
         auction.watchers.add(request.user)
+        auction.is_watched = True
 
     if reverse_method == 'auction':
-        return auction_page(request, auction_id)
+        return HttpResponseRedirect(reverse('auction', args=[auction_id]))
     else:
         return HttpResponseRedirect(reverse(reverse_method))
 
