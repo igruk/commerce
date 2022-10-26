@@ -147,6 +147,10 @@ class AuctionPage(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['bid_form'] = BidForm()
+        context['comment_form'] = CommentForm()
+        context['comments'] = self.object.get_comments.all
+
         if self.object in self.request.user.watchlist.all():
             self.object.is_watched = True
         else:
