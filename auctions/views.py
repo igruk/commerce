@@ -6,7 +6,7 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView, CreateView
 
 from .forms import *
 from .models import User, Category, Auction
@@ -90,44 +90,68 @@ def register(request):
         })
 
 
-@login_required
-def new(request):
-    if request.method == 'POST':
-        form = AuctionForm(request.POST, request.FILES)
-        if form.is_valid():
-            new_auction = form.save(commit=False)
-            new_auction.author = request.user
-            form.save()
+class NewAuction(CreateView):
+    form_class = AuctionForm
+    template_name = 'auctions/new.html'
 
-            auction = Auction.objects.latest('id')
-            return render(request, 'auctions/auction.html', {
-                'auction': auction,
-            })
+    def form_valid(self, form):
+        new_auction = form.save(commit=False)
+        new_auction.author = self.request.user
+        return super().form_valid(form)
+
+
+# @login_required
+# def new(request):
+#     if request.method == 'POST':
+#         form = AuctionForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             new_auction = form.save(commit=False)
+#             new_auction.author = request.user
+#             form.save()
+#
+#             auction = Auction.objects.latest('id')
+#             return render(request, 'auctions/auction.html', {
+#                 'auction': auction,
+#             })
+#         else:
+#             return render(request, "auctions/new.html", {
+#                 'message': 'Not valid data',
+#                 'form': AuctionForm(),
+#             })
+#     else:
+#         return render(request, "auctions/new.html", {
+#             'form': AuctionForm(),
+#         })
+
+
+# def auction_page(request, auction_id):
+#     auction = Auction.objects.get(id=auction_id)
+#
+#     if request.user in auction.watchers.all():
+#         auction.is_watched = True
+#     else:
+#         auction.is_watched = False
+#
+#     return render(request, 'auctions/auction.html', {
+#         'auction': auction,
+#         'bid_form': BidForm(),
+#         'comments': auction.get_comments.all(),
+#         'comment_form': CommentForm(),
+#     })
+
+
+class AuctionPage(DetailView):
+    model = Auction
+    template_name = 'auctions/auction.html'
+    pk_url_kwarg = 'auction_id'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.object in self.request.user.watchlist.all():
+            self.object.is_watched = True
         else:
-            return render(request, "auctions/new.html", {
-                'message': 'Not valid data',
-                'form': AuctionForm(),
-            })
-    else:
-        return render(request, "auctions/new.html", {
-            'form': AuctionForm(),
-        })
-
-
-def auction_page(request, auction_id):
-    auction = Auction.objects.get(id=auction_id)
-
-    if request.user in auction.watchers.all():
-        auction.is_watched = True
-    else:
-        auction.is_watched = False
-
-    return render(request, 'auctions/auction.html', {
-        'auction': auction,
-        'bid_form': BidForm(),
-        'comments': auction.get_comments.all(),
-        'comment_form': CommentForm(),
-    })
+            self.object.is_watched = False
+        return context
 
 
 @login_required
