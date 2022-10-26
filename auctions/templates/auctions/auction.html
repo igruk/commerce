@@ -19,7 +19,7 @@
 
 {% if user.is_authenticated %}
     <div  class="watchlist-button">
-        <a style="margin-left: auto; " class='btn btn-outline-success mt-auto btn-block' href="{% url 'watchlist_edit' auction.id 'auction' %}">
+        <a style="margin-left: auto; " class='btn btn-outline-success mt-auto btn-block' href="{% url 'watchlist_edit' auction.id %}">
             {% if auction.is_watched %}
                 Remove from Watchlist
             {% else %}

@@ -230,7 +230,7 @@ class AuctionWatchlist(ListView):
 
 
 @login_required
-def watchlist_edit(request, auction_id, reverse_method):
+def watchlist_edit(request, auction_id):
     auction = Auction.objects.get(id=auction_id)
 
     if request.user in auction.watchers.all():
@@ -240,10 +240,7 @@ def watchlist_edit(request, auction_id, reverse_method):
         auction.watchers.add(request.user)
         auction.is_watched = True
 
-    if reverse_method == 'auction':
-        return HttpResponseRedirect(reverse('auction', args=[auction_id]))
-    else:
-        return HttpResponseRedirect(reverse(reverse_method))
+    return HttpResponseRedirect(reverse('auction', args=[auction_id]))
 
 
 @login_required

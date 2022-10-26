@@ -13,7 +13,7 @@ urlpatterns = [
     path('auction/<int:auction_id>/bid', auction_bid, name='auction_bid'),
     path('auction/<int:auction_id>/close', auction_close, name='auction_close'),
     path("watchlist", login_required(AuctionWatchlist.as_view()), name="watchlist"),
-    path("watchlist/<int:auction_id>/edit/<str:reverse_method>", watchlist_edit, name='watchlist_edit'),
+    path("watchlist/<int:auction_id>/watch", watchlist_edit, name='watchlist_edit'),
     path('auction/<int:auction_id>/comment', comment, name='comment'),
     path("search", search, name="search"),
 ]
