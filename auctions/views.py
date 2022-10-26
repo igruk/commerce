@@ -126,6 +126,50 @@ class AuctionCategory(ListView):
         return context
 
 
+class AuctionWatchlist(ListView):
+    model = Auction
+    template_name = 'auctions/index.html'
+    context_object_name = 'auctions'
+    allow_empty = False
+
+    def get_queryset(self):
+        return self.request.user.watchlist.all()
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Watchlist'
+        return context
+
+
+class Purchases(ListView):
+    model = Auction
+    template_name = 'auctions/index.html'
+    context_object_name = 'auctions'
+    allow_empty = False
+
+    def get_queryset(self):
+        return Auction.objects.filter(buyer=self.request.user)
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'My Purchases'
+        return context
+
+
+@login_required
+def watchlist_edit(request, auction_id):
+    auction = Auction.objects.get(id=auction_id)
+
+    if request.user in auction.watchers.all():
+        auction.watchers.remove(request.user)
+        auction.is_watched = False
+    else:
+        auction.watchers.add(request.user)
+        auction.is_watched = True
+
+    return HttpResponseRedirect(reverse('auction', args=[auction_id]))
+
+
 @login_required
 def auction_bid(request, auction_id):
     auction = Auction.objects.get(id=auction_id)
@@ -149,35 +193,6 @@ def auction_bid(request, auction_id):
             'bid_form': BidForm,
             'error_min_value': True,
         })
-
-
-class AuctionWatchlist(ListView):
-    model = Auction
-    template_name = 'auctions/index.html'
-    context_object_name = 'auctions'
-    allow_empty = False
-
-    def get_queryset(self):
-        return self.request.user.watchlist.all()
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Watchlist'
-        return context
-
-
-@login_required
-def watchlist_edit(request, auction_id):
-    auction = Auction.objects.get(id=auction_id)
-
-    if request.user in auction.watchers.all():
-        auction.watchers.remove(request.user)
-        auction.is_watched = False
-    else:
-        auction.watchers.add(request.user)
-        auction.is_watched = True
-
-    return HttpResponseRedirect(reverse('auction', args=[auction_id]))
 
 
 @login_required
@@ -215,3 +230,4 @@ def search(request):
         'auctions': auctions,
         'title': 'Search Results'
     })
+
