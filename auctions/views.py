@@ -7,6 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views.generic import ListView, DetailView, CreateView
+from django.contrib import messages
 
 from .forms import *
 from .models import User, Category, Auction
@@ -188,11 +189,8 @@ def auction_bid(request, auction_id):
 
         return HttpResponseRedirect(reverse('auction', args=[auction_id]))
     else:
-        return render(request, 'auctions/auction.html', {
-            'auction': auction,
-            'bid_form': BidForm,
-            'error_min_value': True,
-        })
+        messages.error(request, 'Your bid must be greater than current price.')
+        return HttpResponseRedirect(reverse('auction', args=[auction_id]))
 
 
 @login_required

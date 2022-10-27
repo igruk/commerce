@@ -83,8 +83,9 @@
 
     {% if auction.author != user and auction.active %}
 
-        {% if error_min_value %}
+        {% if messages %}
             <p>
+                {% for message in messages %}
                 {% if auction.current_bid %}
                     <div class='alert alert-warning' role='alert'>
                         Your bid must be greater than <strong>&dollar;{{ auction.current_bid|default:auction.starting_bid }}</strong>.
@@ -94,6 +95,7 @@
                         Your bid must be greater than or equal to <strong>&dollar;{{ auction.current_bid|default:auction.starting_bid }}</strong>.
                     </div>
                 {% endif %}
+                {% endfor %}
             </p>
         {% endif %}
 
