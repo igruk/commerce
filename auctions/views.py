@@ -219,13 +219,17 @@ def comment(request, auction_id):
     return HttpResponseRedirect(reverse('auction', args=[auction_id]))
 
 
-def search(request):
-    query = request.GET.get('q')
-    auctions = Auction.objects.filter(title__icontains=query)
-    print(auctions)
+class AuctionSearch(ListView):
+    model = Auction
+    template_name = 'auctions/index.html'
+    context_object_name = 'auctions'
 
-    return render(request, 'auctions/index.html', {
-        'auctions': auctions,
-        'title': 'Search Results'
-    })
+    def get_queryset(self):
+        query = self.request.GET.get('q')
+        print(query)
+        return Auction.objects.filter(title__icontains=query)
 
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Search Results'
+        return context
