@@ -225,14 +225,12 @@ def comment(request, auction_id):
 
 class AuctionSearch(ListView):
     model = Auction
-    paginate_by = 3
     template_name = 'auctions/index.html'
     context_object_name = 'auctions'
 
     def get_queryset(self):
         query = self.request.GET.get('q')
-        print(query)
-        return Auction.objects.filter(title__icontains=query)
+        return Auction.objects.filter(title__icontains=query, active=True)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
