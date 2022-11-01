@@ -15,6 +15,7 @@ from .models import User, Category, Auction
 
 class AuctionsHome(ListView):
     model = Auction
+    paginate_by = 3
     template_name = 'auctions/index.html'
     context_object_name = 'auctions'
     extra_context = {
@@ -114,6 +115,7 @@ class NewAuction(CreateView):
 
 class AuctionCategory(ListView):
     model = Auction
+    paginate_by = 3
     template_name = 'auctions/index.html'
     context_object_name = 'auctions'
     allow_empty = False
@@ -129,6 +131,7 @@ class AuctionCategory(ListView):
 
 class AuctionWatchlist(ListView):
     model = Auction
+    paginate_by = 3
     template_name = 'auctions/index.html'
     context_object_name = 'auctions'
     allow_empty = False
@@ -144,6 +147,7 @@ class AuctionWatchlist(ListView):
 
 class Purchases(ListView):
     model = Auction
+    paginate_by = 3
     template_name = 'auctions/index.html'
     context_object_name = 'auctions'
     allow_empty = False
@@ -221,6 +225,7 @@ def comment(request, auction_id):
 
 class AuctionSearch(ListView):
     model = Auction
+    paginate_by = 3
     template_name = 'auctions/index.html'
     context_object_name = 'auctions'
 
