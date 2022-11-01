@@ -18,7 +18,7 @@ class AuctionsHome(ListView):
     template_name = 'auctions/index.html'
     context_object_name = 'auctions'
     extra_context = {
-        'title': 'Active Listings'
+        'title': 'Auctions'
     }
 
     def get_queryset(self):
@@ -123,7 +123,7 @@ class AuctionCategory(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = str(context['auctions'][0].category)
+        context['title'] = context['h2_title'] = str(context['auctions'][0].category)
         return context
 
 
@@ -138,7 +138,7 @@ class AuctionWatchlist(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Watchlist'
+        context['title'] = context['h2_title'] = 'Watchlist'
         return context
 
 
@@ -153,7 +153,7 @@ class Purchases(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'My Purchases'
+        context['title'] = context['h2_title'] = 'My Purchases'
         return context
 
 
@@ -231,5 +231,5 @@ class AuctionSearch(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Search Results'
+        context['title'] = context['h2_title'] = 'Search Results'
         return context
