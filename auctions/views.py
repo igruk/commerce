@@ -66,17 +66,21 @@ def register(request):
                 'message': 'Passwords must match.',
                 'title': 'Register'
             })
-
+        if not username or not password or not email:
+            return render(request, 'auctions/register.html', {
+                'message': 'Form is not valid.',
+                'title': 'Register'
+            })
         # Attempt to create new user
         try:
             user = User.objects.create_user(username, email, password)
             user.save()
+            login(request, user)
         except IntegrityError:
             return render(request, 'auctions/register.html', {
                 'message': 'Username already taken.',
                 'title': 'Register'
             })
-        login(request, user)
         return HttpResponseRedirect(reverse('index'))
     else:
         return render(request, 'auctions/register.html', {
