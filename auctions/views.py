@@ -11,17 +11,15 @@ from django.views.generic import ListView, DetailView, CreateView
 from django.contrib import messages
 
 from .forms import *
+from .utils import *
 from .models import User, Category, Auction
 
 
-class AuctionsHome(ListView):
-    model = Auction
-    paginate_by = 3
-    template_name = 'auctions/index.html'
-    context_object_name = 'auctions'
-    extra_context = {
-        'title': 'Auctions'
-    }
+class AuctionsHome(DataMixin, ListView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Auctions')
+        return dict(list(context.items()) + list(c_def.items()))
 
     def get_queryset(self):
         return Auction.objects.filter(active=True)
@@ -116,26 +114,18 @@ class NewAuction(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class AuctionCategory(ListView):
-    model = Auction
-    paginate_by = 3
-    template_name = 'auctions/index.html'
-    context_object_name = 'auctions'
-
+class AuctionCategory(DataMixin, ListView):
     def get_queryset(self):
         return Auction.objects.filter(category__category_name=self.kwargs['category_name'], active=True)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = context['h2_title'] = self.kwargs['category_name']
-        return context
+        name = self.kwargs['category_name']
+        c_def = self.get_user_context(title=name, h2_title=name)
+        return dict(list(context.items()) + list(c_def.items()))
 
 
-class AuctionWatchlist(LoginRequiredMixin, ListView):
-    model = Auction
-    paginate_by = 3
-    template_name = 'auctions/index.html'
-    context_object_name = 'auctions'
+class AuctionWatchlist(LoginRequiredMixin, DataMixin, ListView):
     login_url = reverse_lazy('login')
 
     def get_queryset(self):
@@ -143,15 +133,11 @@ class AuctionWatchlist(LoginRequiredMixin, ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = context['h2_title'] = 'Watchlist'
-        return context
+        c_def = self.get_user_context(title='Watchlist', h2_title='Watchlist')
+        return dict(list(context.items()) + list(c_def.items()))
 
 
-class Purchases(LoginRequiredMixin, ListView):
-    model = Auction
-    paginate_by = 3
-    template_name = 'auctions/index.html'
-    context_object_name = 'auctions'
+class Purchases(LoginRequiredMixin, DataMixin, ListView):
     login_url = reverse_lazy('login')
 
     def get_queryset(self):
@@ -159,8 +145,8 @@ class Purchases(LoginRequiredMixin, ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = context['h2_title'] = 'My Purchases'
-        return context
+        c_def = self.get_user_context(title='Purchases', h2_title='Purchases')
+        return dict(list(context.items()) + list(c_def.items()))
 
 
 @login_required
@@ -225,10 +211,8 @@ def comment(request, auction_id):
     return HttpResponseRedirect(reverse('auction', args=[auction_id]))
 
 
-class AuctionSearch(ListView):
-    model = Auction
-    template_name = 'auctions/index.html'
-    context_object_name = 'auctions'
+class AuctionSearch(DataMixin, ListView):
+    paginate_by = None
 
     def get_queryset(self):
         query = self.request.GET.get('q')
@@ -236,5 +220,5 @@ class AuctionSearch(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = context['h2_title'] = 'Search Results'
-        return context
+        c_def = self.get_user_context(title='Search Results', h2_title='Search Results')
+        return dict(list(context.items()) + list(c_def.items()))
