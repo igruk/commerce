@@ -48,7 +48,8 @@
 {% for comment in comments %}
     <div>
         <div class='text-muted'>
-            <strong>{{ comment.user|default:"Unknown" }}</strong> commented on {{ comment.created }}
+            <strong>{{ comment.user }}</strong>
+            commented on {{ comment.created }}
         </div>
     </div>
     <div>

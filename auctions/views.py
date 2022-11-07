@@ -106,6 +106,9 @@ class AuctionPage(DetailView):
                 self.object.is_watched = False
         return context
 
+    def get_queryset(self):
+        return Auction.objects.all().select_related('author', 'category', 'buyer')
+
 
 class NewAuction(LoginRequiredMixin, CreateView):
     form_class = AuctionForm

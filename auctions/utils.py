@@ -5,7 +5,7 @@ class DataMixin:
     model = Auction
     template_name = 'auctions/index.html'
     context_object_name = 'auctions'
-    paginate_by = 3
+    paginate_by = 6
 
     def get_user_context(self, **kwargs):
         context = kwargs
