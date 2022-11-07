@@ -2,10 +2,11 @@ from decimal import Decimal
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView
 from django.contrib import messages
 
@@ -96,16 +97,18 @@ class AuctionPage(DetailView):
         context['comment_form'] = CommentForm()
         context['comments'] = self.object.get_comments.all
 
-        if self.object in self.request.user.watchlist.all():
-            self.object.is_watched = True
-        else:
-            self.object.is_watched = False
+        if self.request.user.is_authenticated:
+            if self.object in self.request.user.watchlist.all():
+                self.object.is_watched = True
+            else:
+                self.object.is_watched = False
         return context
 
 
-class NewAuction(CreateView):
+class NewAuction(LoginRequiredMixin, CreateView):
     form_class = AuctionForm
     template_name = 'auctions/new.html'
+    login_url = reverse_lazy('login')
 
     def form_valid(self, form):
         new_auction = form.save(commit=False)
@@ -118,23 +121,22 @@ class AuctionCategory(ListView):
     paginate_by = 3
     template_name = 'auctions/index.html'
     context_object_name = 'auctions'
-    allow_empty = False
 
     def get_queryset(self):
         return Auction.objects.filter(category__category_name=self.kwargs['category_name'], active=True)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = context['h2_title'] = str(context['auctions'][0].category)
+        context['title'] = context['h2_title'] = self.kwargs['category_name']
         return context
 
 
-class AuctionWatchlist(ListView):
+class AuctionWatchlist(LoginRequiredMixin, ListView):
     model = Auction
     paginate_by = 3
     template_name = 'auctions/index.html'
     context_object_name = 'auctions'
-    allow_empty = False
+    login_url = reverse_lazy('login')
 
     def get_queryset(self):
         return self.request.user.watchlist.all()
@@ -145,12 +147,12 @@ class AuctionWatchlist(ListView):
         return context
 
 
-class Purchases(ListView):
+class Purchases(LoginRequiredMixin, ListView):
     model = Auction
     paginate_by = 3
     template_name = 'auctions/index.html'
     context_object_name = 'auctions'
-    allow_empty = False
+    login_url = reverse_lazy('login')
 
     def get_queryset(self):
         return Auction.objects.filter(buyer=self.request.user)
