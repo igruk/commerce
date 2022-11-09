@@ -6,14 +6,19 @@
 <html lang="en">
     <head>
         <title>{% block title %}{{ title }}{% endblock %}</title>
+
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
         <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+        
         <link rel='icon' type='image/x-icon' href='{% static "images/favicon.ico" %}'>
     </head>
     <body>
+
+        <!-- Header -->
         <header>
             <div class="login">
                 {% if user.is_authenticated %}
+                    <!-- User Button -->
                     <div class="btn-group">
                         <button type="button" class="btn btn-info dropdown-toggle btn-sm" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             {{ user.username }}
@@ -27,19 +32,28 @@
                         </div>
                     </div>
                 {% else %}
+                    <!-- Login / Register Buttons -->
                     <a class="btn btn-primary btn-sm" href="{% url 'login' %}" role="button">Log In</a>
                     <a class="btn btn-primary btn-sm" href="{% url 'register' %}" role="button">Register</a>
                 {% endif %}
             </div>
+            
+            <!-- Main Title Logo -->
             <a href="{% url 'index' %}">
                 <img src="{% static 'images\auction.png' %}" class="title" style="margin-top: -40px; width: auto">
             </a>
+
+            <!-- Navbar -->
             <nav class="navbar navbar-expand-lg">
                 <div class="container-fluid">
                     <ul class="nav">
+
+                        <!-- Nav Item - Home -->
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'index' %}">Home</a>
                         </li>
+
+                        <!-- Nav Item - Categories -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 Categories
@@ -50,10 +64,14 @@
                                 {% endfor %}
                             </div>
                         </li>
+
                         {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'watchlist' %}">Watchlist</a>
-                        </li>
+                            <!-- Nav Item - Watchlist -->
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'watchlist' %}">Watchlist</a>
+                            </li>
+                            
+                            <!-- Nav Item - New Auction -->
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'new' %}">New Auction</a>
                             </li>
@@ -61,18 +79,24 @@
                     </ul>
                 </div>
             </nav>
+
+            <!-- Search -->
             <div class="input-group">
                 <form class="input-group" action="{% url 'search' %}" method="get">
                     <input type="search" name="q" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
                     <button type="submit" class="btn btn-outline-primary">Search</button>
                 </form>
             </div>
+
         </header>
+        <!-- End of Header -->
 
         <h2 class="title">{{ h2_title }}</h2>
 
         {% block body %}
         {% endblock %}
+
+        <!-- Pagination -->
         {% if page_obj.has_other_pages %}
         <div class="container my-auto">
             <nav class="list-pages">
@@ -100,6 +124,9 @@
             </nav>
         </div>
         {% endif %}
+        <!-- End of Pagination -->
+
+        <!-- Footer -->
         <footer class='sticky-footer bg-light'>
             <div class='container my-auto'>
                 <div class='copyright text-center my-auto'>
@@ -111,6 +138,8 @@
                 </div>
             </div>
         </footer>
+        <!-- End of Footer -->
+
     </body>
 
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>

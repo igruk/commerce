@@ -7,6 +7,7 @@
 
 <h2 class="title">{{ auction.title }}</h2>
 
+    <!-- Category, Creator and Date -->
     <h6 class="centered">
         <span class='text-muted'>
             Category: <span class='text-primary'>{{ auction.category }}</span>
@@ -18,6 +19,7 @@
     </h6>
 
 {% if user.is_authenticated %}
+    <!-- Watchlist Button -->
     <div  class="watchlist-button">
         <a style="margin-left: auto; " class='btn btn-outline-success mt-auto btn-block' href="{% url 'watchlist_edit' auction.id %}">
             {% if auction.is_watched %}
@@ -31,50 +33,54 @@
 <br>
 <br>
 
+
 <div class="img-product">
-{% if auction.image %}
-    <img src="{{ auction.image.url }}" alt='Product'>
-{% else %}
-    <img src="https://image.shutterstock.com/image-vector/no-image-available-vector-hand-260nw-745639717.jpg" alt="NoImage" style="width:300px;">
-{% endif %}
-<h4 style="margin-top: 20px;">{{ auction.description }}</h4>
+    <!-- Product Image -->
+    {% if auction.image %}
+        <img src="{{ auction.image.url }}" alt='Product'>
+    {% else %}
+        <img src="https://image.shutterstock.com/image-vector/no-image-available-vector-hand-260nw-745639717.jpg" alt="NoImage" style="width:300px;">
+    {% endif %}
+
+    <!-- Product Description -->
+    <h4 style="margin-top: 20px;">{{ auction.description }}</h4>
 </div>
 
+<!-- Comments -->
 {% if comments %}
-<div class="comments">
-<h4 class='fw-bolder'>
-    Comments
-</h4>
-{% for comment in comments %}
-    <div>
-        <div class='text-muted'>
-            <strong>{{ comment.user }}</strong>
-            commented on {{ comment.created }}
-        </div>
+    <div class="comments">
+        <h4 class='fw-bolder'>
+            Comments
+        </h4>
+        {% for comment in comments %}
+            <div>
+                <div class='text-muted'>
+                    <strong>{{ comment.user }}</strong> commented on {{ comment.created }}
+                </div>
+            </div>
+            <div>
+                <p>{{ comment.comment }}</p>
+            </div>
+        {% endfor %}
     </div>
-    <div>
-        <p>{{ comment.comment }}</p>
-    </div>
-{% endfor %}
-</div>
 {% endif %}
 
 <div class="new-form">
     {% if auction.active %}
-
+        <!-- Product Price -->
         <h4 class='fw-bolder'>
             {% if auction.current_bid %}
-            Current price:<strong> &dollar;{{auction.current_bid}}</strong>
+                Current price:<strong> &dollar;{{auction.current_bid}}</strong>
             {% else %}
                 Starting price:<strong> &dollar;{{auction.starting_bid}}</strong>
             {% endif %}
         </h4>
-
     {% endif %}
 
     {% if user.is_authenticated %}
 
         {% if auction.author == user and auction.active %}
+        <!-- Close Auction Button -->
         <div class='card-body'>
             <a class='btn btn-danger mt-auto' href="{% url 'auction_close' auction.id %}">
                 Close auction
@@ -82,39 +88,42 @@
         </div>
         {% endif %}
 
-    {% if auction.author != user and auction.active %}
+        {% if auction.author != user and auction.active %}
 
-        {% if messages %}
-            <p>
-                {% for message in messages %}
-                {% if auction.current_bid %}
-                    <div class='alert alert-warning' role='alert'>
-                        Your bid must be greater than <strong>&dollar;{{ auction.current_bid|default:auction.starting_bid }}</strong>.
+            {% if messages %}
+                <!-- Error Messages -->
+                <p>
+                    {% for message in messages %}
+                    {% if auction.current_bid %}
+                        <div class='alert alert-warning' role='alert'>
+                            Your bid must be greater than <strong>&dollar;{{ auction.current_bid|default:auction.starting_bid }}</strong>.
+                        </div>
+                    {% else %}
+                        <div class='alert alert-warning' role='alert'>
+                            Your bid must be greater than or equal to <strong>&dollar;{{ auction.current_bid|default:auction.starting_bid }}</strong>.
+                        </div>
+                    {% endif %}
+                    {% endfor %}
+                </p>
+            {% endif %}
+            
+            <!-- Bid -->
+            <div class='form-group'>
+                <form action="{% url 'auction_bid' auction.id %}" method='POST'>
+                    {% csrf_token %}
+                    <div class="form-group">
+                        {{ bid_form }}
+                        <br>
+                        <button type='submit' class='btn btn-primary'>
+                            Place a bid
+                        </button>
                     </div>
-                {% else %}
-                    <div class='alert alert-warning' role='alert'>
-                        Your bid must be greater than or equal to <strong>&dollar;{{ auction.current_bid|default:auction.starting_bid }}</strong>.
-                    </div>
-                {% endif %}
-                {% endfor %}
-            </p>
+                </form>
+            </div>
         {% endif %}
-
-    <div class='form-group'>
-        <form action="{% url 'auction_bid' auction.id %}" method='POST'>
-            {% csrf_token %}
-        <div class="form-group">
-            {{ bid_form }}
-        <br>
-        <button type='submit' class='btn btn-primary'>
-            Place a bid
-        </button>
-        </div>
-        </form>
-    </div>
-    {% endif %}
     {% endif %}
 
+<!-- Messages for closed auction -->
 {% if auction.active == False %}
     {% if auction.buyer %}
         {% if auction.author == user %}
@@ -140,6 +149,8 @@
 <br>
 <br>
 <br>
+
+<!-- Comment Form -->
 {% if auction.active %}
     {% if user.is_authenticated %}
         <div class="new-form">
