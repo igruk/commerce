@@ -11,6 +11,7 @@ from django.views.generic import ListView, DetailView, CreateView
 from django.contrib import messages
 
 from .forms import *
+from .service import send
 from .utils import *
 from .models import User, Category, Auction
 
@@ -201,6 +202,7 @@ def auction_close(request, auction_id):
         if auction.current_bid:
             auction.buyer = Bid.objects.filter(auction=auction).last().user
         auction.save()
+        send(auction.buyer.email)
         return HttpResponseRedirect(reverse('auction', args=[auction_id]))
     else:
         auction.watchers.add(request.user)

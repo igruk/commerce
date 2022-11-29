@@ -2,3 +2,5 @@
 __pycache__/
 /media/
 /auction_cache/
+/venv/
+auctions/config.py
