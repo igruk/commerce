@@ -204,7 +204,7 @@ def auction_close(request, auction_id):
             auction.buyer = Bid.objects.filter(auction=auction).last().user
         auction.save()
         # send(auction.buyer.email)
-        send_email.delay(auction.buyer.email)
+        # send_email.delay(auction.buyer.email)
         return HttpResponseRedirect(reverse('auction', args=[auction_id]))
     else:
         auction.watchers.add(request.user)
