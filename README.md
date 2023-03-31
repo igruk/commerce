@@ -8,7 +8,6 @@ It uses a **PostgreSQL** database to store data and **Celery** with **Redis** fo
 
 ![auction1](https://user-images.githubusercontent.com/88056536/228724544-f77ab4ff-dd43-4259-8cc0-e4f4d49313ff.jpg)
 ![auction2](https://user-images.githubusercontent.com/88056536/228724590-a614882c-6ef6-4ade-b5e4-52c5b9067299.jpg)
-![auction3](https://user-images.githubusercontent.com/88056536/228724760-6daa8ecc-6f06-4307-9edc-d2ceff9d11e6.jpg)
 
 ## Features
 
