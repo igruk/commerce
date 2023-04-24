@@ -14,10 +14,10 @@ It uses a **PostgreSQL** database to store data and **Celery** with **Redis** fo
 - User registration and authentication
 - Ability to create and close auctions
 - Ability to view and search for auctions
-- Ability to add auctions to watchlist
+- Ability to add auctions to the watchlist
 - Ability to bid on auctions
 - Ability to write and view comments on auctions
-- Ability to view list of purchases
+- Ability to view a list of purchases
 - Email notifications to the auction winner
 
 ## Technologies Used
