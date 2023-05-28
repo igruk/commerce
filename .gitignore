@@ -1,7 +1,7 @@
-/db.sqlite3
-/db-1.sqlite3
+db.sqlite3
+.idea/
 __pycache__/
-/media/
-/auction_cache/
-/venv/
+media/
+auction_cache/
+venv/
 auctions/config.py

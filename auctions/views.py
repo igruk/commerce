@@ -2,26 +2,26 @@ from decimal import Decimal
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, redirect
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView
 from django.contrib import messages
 
-from .forms import *
-from .service import send
-from .tasks import send_email
-from .utils import *
-from .models import User, Category, Auction
+# from .service import send
+# from .tasks import send_email
+from .utils import DataMixin, LoginMixin
+from .models import User, Auction, Bid
+from .forms import CommentForm, BidForm, AuctionForm
 
 
 class AuctionsHome(DataMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(title='Auctions')
-        return dict(list(context.items()) + list(c_def.items()))
+        context.update(c_def)
+        return context
 
     def get_queryset(self):
         return Auction.objects.filter(active=True)
@@ -112,10 +112,9 @@ class AuctionPage(DetailView):
         return Auction.objects.all().select_related('author', 'category', 'buyer')
 
 
-class NewAuction(LoginRequiredMixin, CreateView):
+class NewAuction(LoginMixin, CreateView):
     form_class = AuctionForm
     template_name = 'auctions/new.html'
-    login_url = reverse_lazy('login')
 
     def form_valid(self, form):
         new_auction = form.save(commit=False)
@@ -124,6 +123,8 @@ class NewAuction(LoginRequiredMixin, CreateView):
 
 
 class AuctionCategory(DataMixin, ListView):
+    allow_empty = False
+
     def get_queryset(self):
         return Auction.objects.filter(category__category_name=self.kwargs['category_name'], active=True)
 
@@ -131,31 +132,30 @@ class AuctionCategory(DataMixin, ListView):
         context = super().get_context_data(**kwargs)
         name = self.kwargs['category_name']
         c_def = self.get_user_context(title=name, h2_title=name)
-        return dict(list(context.items()) + list(c_def.items()))
+        context.update(c_def)
+        return context
 
 
-class AuctionWatchlist(LoginRequiredMixin, DataMixin, ListView):
-    login_url = reverse_lazy('login')
-
+class AuctionWatchlist(LoginMixin, DataMixin, ListView):
     def get_queryset(self):
         return self.request.user.watchlist.all()
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(title='Watchlist', h2_title='Watchlist')
-        return dict(list(context.items()) + list(c_def.items()))
+        context.update(c_def)
+        return context
 
 
-class Purchases(LoginRequiredMixin, DataMixin, ListView):
-    login_url = reverse_lazy('login')
-
+class Purchases(LoginMixin, DataMixin, ListView):
     def get_queryset(self):
         return Auction.objects.filter(buyer=self.request.user)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(title='Purchases', h2_title='Purchases')
-        return dict(list(context.items()) + list(c_def.items()))
+        context.update(c_def)
+        return context
 
 
 @login_required

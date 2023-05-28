@@ -1,5 +1,6 @@
 from django import template
-from ..models import *
+
+from auctions.models import Category
 
 register = template.Library()
 

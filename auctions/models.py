@@ -26,8 +26,8 @@ class Auction(models.Model):
     description = models.TextField(max_length=900, null=True)
     author = models.ForeignKey(User, models.PROTECT, related_name='auctions')
     starting_bid = models.DecimalField(max_digits=7, decimal_places=2, validators=[MinValueValidator(0.01)])
-    current_bid = models.DecimalField(max_digits=7, decimal_places=2, validators=[MinValueValidator(0.01)], blank=True,
-                                      null=True)
+    current_bid = models.DecimalField(max_digits=7, decimal_places=2, validators=[MinValueValidator(0.01)],
+                                      blank=True, null=True)
     image = models.ImageField(upload_to='images/')
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='categories')
     active = models.BooleanField(default=True)
