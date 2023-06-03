@@ -17,6 +17,7 @@ from .forms import CommentForm, BidForm, AuctionForm
 
 
 class AuctionsHome(DataMixin, ListView):
+    """View for the home page displaying a list of active auctions."""
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(title='Auctions')
@@ -28,6 +29,7 @@ class AuctionsHome(DataMixin, ListView):
 
 
 def login_view(request):
+    """View function for user login."""
     if request.method == 'POST':
 
         # Attempt to sign user in
@@ -51,11 +53,13 @@ def login_view(request):
 
 
 def logout_view(request):
+    """View function for user logout."""
     logout(request)
     return HttpResponseRedirect(reverse('index'))
 
 
 def register(request):
+    """View function for user register."""
     if request.method == 'POST':
         username = request.POST['username']
         email = request.POST['email']
@@ -91,6 +95,7 @@ def register(request):
 
 
 class AuctionPage(DetailView):
+    """View for displaying details of an auction."""
     model = Auction
     template_name = 'auctions/auction.html'
     pk_url_kwarg = 'auction_id'
@@ -113,6 +118,7 @@ class AuctionPage(DetailView):
 
 
 class NewAuction(LoginMixin, CreateView):
+    """View for creating a new auction."""
     form_class = AuctionForm
     template_name = 'auctions/new.html'
 
@@ -123,6 +129,7 @@ class NewAuction(LoginMixin, CreateView):
 
 
 class AuctionCategory(DataMixin, ListView):
+    """View for displaying a list of auctions in a specific category."""
     allow_empty = False
 
     def get_queryset(self):
@@ -137,6 +144,7 @@ class AuctionCategory(DataMixin, ListView):
 
 
 class AuctionWatchlist(LoginMixin, DataMixin, ListView):
+    """View for displaying the user's watchlist."""
     def get_queryset(self):
         return self.request.user.watchlist.all()
 
@@ -148,6 +156,7 @@ class AuctionWatchlist(LoginMixin, DataMixin, ListView):
 
 
 class Purchases(LoginMixin, DataMixin, ListView):
+    """View for displaying a list of auctions that user won."""
     def get_queryset(self):
         return Auction.objects.filter(buyer=self.request.user)
 
@@ -160,6 +169,7 @@ class Purchases(LoginMixin, DataMixin, ListView):
 
 @login_required
 def watchlist_edit(request, auction_id):
+    """View for adding/removing an auction from the user's watchlist."""
     auction = Auction.objects.get(id=auction_id)
 
     if request.user in auction.watchers.all():
@@ -174,6 +184,7 @@ def watchlist_edit(request, auction_id):
 
 @login_required
 def auction_bid(request, auction_id):
+    """View for placing a bid on an auction."""
     auction = Auction.objects.get(id=auction_id)
     amount = Decimal(request.POST['amount'])
 
@@ -196,6 +207,7 @@ def auction_bid(request, auction_id):
 
 @login_required
 def auction_close(request, auction_id):
+    """View for closing an auction."""
     auction = Auction.objects.get(id=auction_id)
 
     if request.user == auction.author:
@@ -213,6 +225,7 @@ def auction_close(request, auction_id):
 
 @login_required
 def comment(request, auction_id):
+    """View for adding a comment to an auction."""
     auction = Auction.objects.get(id=auction_id)
     form = CommentForm(request.POST)
     new_comment = form.save(commit=False)
@@ -223,6 +236,7 @@ def comment(request, auction_id):
 
 
 class AuctionSearch(DataMixin, ListView):
+    """View for searching auctions based on a query."""
     paginate_by = None
 
     def get_queryset(self):
