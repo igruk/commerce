@@ -10,8 +10,8 @@ from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, FormView
 from django.contrib import messages
 
-# from .service import send
-# from .tasks import send_email
+from .service import send
+from .tasks import send_email
 from .utils import DataMixin, LoginMixin
 from .models import User, Auction, Bid, Comment
 from .forms import CommentForm, BidForm, AuctionForm
@@ -163,7 +163,6 @@ class Purchases(LoginMixin, DataMixin, ListView):
 
 class WatchlistEdit(LoginMixin, View):
     """View for adding/removing an auction from the user's watchlist."""
-
     def get(self, request, auction_id):
         auction = Auction.objects.get(id=auction_id)
 
@@ -205,7 +204,6 @@ class AuctionBid(LoginMixin, FormView):
 
 class AuctionClose(LoginMixin, View):
     """View for closing an auction."""
-
     def get(self, request, auction_id):
         auction = get_object_or_404(Auction, id=auction_id)
 
@@ -214,8 +212,8 @@ class AuctionClose(LoginMixin, View):
             if auction.current_bid:
                 auction.buyer = Bid.objects.filter(auction=auction).last().user
             auction.save()
-            # send(auction.buyer.email)
-            # send_email.delay(auction.buyer.email)
+            send(auction.buyer.email)
+            send_email.delay(auction.buyer.email)
             return HttpResponseRedirect(reverse('auction', args=[auction_id]))
         else:
             return HttpResponseForbidden()
