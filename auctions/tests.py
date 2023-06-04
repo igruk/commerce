@@ -2,6 +2,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 
+from auctions.models import Category
 
 User = get_user_model()
 
@@ -29,7 +30,7 @@ class AuthenticationTests(TestCase):
             'password': 'invalidpass'
         })
         self.assertTemplateUsed(response, 'auctions/login.html')
-        self.assertContains(response, 'Invalid username and/or password.')
+        self.assertContains(response, 'Invalid username or password.')
 
     def test_logout_view(self):
         self.client.force_login(self.user)
@@ -66,3 +67,33 @@ class AuthenticationTests(TestCase):
         })
         self.assertTemplateUsed(response, 'auctions/register.html')
         self.assertContains(response, 'Form is not valid.')
+
+
+class UserModelUnitTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(email='john@test.com', username='John', password='pass123')
+
+    def test_user_model(self):
+        data = self.user
+        self.assertTrue(isinstance(data, User))
+        self.assertIsInstance(data, User)
+        self.assertEqual(str(data.username), 'John')
+
+
+class CategoryUnitTestCase(TestCase):
+    def setUp(self):
+        self.category = Category.objects.create(category_name='Books')
+
+    def test_food_category_model(self):
+        data = self.category
+        self.assertIsInstance(data, Category)
+        self.assertEqual(str(data.category_name), 'Books')
+
+
+class IndexRequestTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+    def test_index_view(self):
+        response = self.client.get(reverse('index'))
+        self.assertEqual(response.status_code, 200)
