@@ -30,7 +30,7 @@ class AuctionsHome(DataMixin, ListView):
 
 
 class MyLoginView(LoginView):
-    """View function for user login."""
+    """View for user login."""
     template_name = 'auctions/login.html'
     redirect_authenticated_user = True
 
@@ -46,12 +46,12 @@ class MyLoginView(LoginView):
 
 
 class MyLogoutView(LoginMixin, LogoutView):
-    """View function for user logout."""
+    """View for user logout."""
     next_page = reverse_lazy('index')
 
 
 def register(request):
-    """View function for user register."""
+    """View for user register."""
     if request.method == 'POST':
         username = request.POST['username']
         email = request.POST['email']
@@ -250,3 +250,8 @@ class AuctionSearch(DataMixin, ListView):
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(title='Search Results', h2_title='Search Results')
         return dict(list(context.items()) + list(c_def.items()))
+
+
+class PageNotFoundView(View):
+    def dispatch(self, request, *args, **kwargs):
+        return render(request, 'auctions/404.html', status=404)
