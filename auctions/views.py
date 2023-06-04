@@ -1,61 +1,57 @@
 from decimal import Decimal
 
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import login
+from django.contrib.auth.views import LoginView, LogoutView
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, redirect
+from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse, reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView
+from django.views import View
+from django.views.generic import ListView, DetailView, CreateView, FormView
 from django.contrib import messages
 
-from .forms import *
 from .service import send
 from .tasks import send_email
-from .utils import *
-from .models import User, Category, Auction
+from .utils import DataMixin, LoginMixin
+from .models import User, Auction, Bid, Comment
+from .forms import CommentForm, BidForm, AuctionForm
 
 
 class AuctionsHome(DataMixin, ListView):
+    """View for the home page displaying a list of active auctions."""
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(title='Auctions')
-        return dict(list(context.items()) + list(c_def.items()))
+        context.update(c_def)
+        return context
 
     def get_queryset(self):
         return Auction.objects.filter(active=True)
 
 
-def login_view(request):
-    if request.method == 'POST':
+class MyLoginView(LoginView):
+    """View for user login."""
+    template_name = 'auctions/login.html'
+    redirect_authenticated_user = True
 
-        # Attempt to sign user in
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
+    def get_success_url(self):
+        return reverse_lazy('index')
 
-        # Check if authentication successful
-        if user is not None:
-            login(request, user)
-            return HttpResponseRedirect(reverse('index'))
-        else:
-            return render(request, 'auctions/login.html', {
-                'message': 'Invalid username and/or password.',
-                'title': 'Log in'
-            })
-    else:
-        return render(request, 'auctions/login.html', {
-            'title': 'Log in'
-        })
+    def form_invalid(self, form):
+        return render(
+            self.request,
+            self.template_name,
+            {'form': form, 'message': 'Invalid username or password.'}
+        )
 
 
-def logout_view(request):
-    logout(request)
-    return HttpResponseRedirect(reverse('index'))
+class MyLogoutView(LoginMixin, LogoutView):
+    """View for user logout."""
+    next_page = reverse_lazy('index')
 
 
 def register(request):
+    """View for user register."""
     if request.method == 'POST':
         username = request.POST['username']
         email = request.POST['email']
@@ -91,6 +87,7 @@ def register(request):
 
 
 class AuctionPage(DetailView):
+    """View for displaying details of an auction."""
     model = Auction
     template_name = 'auctions/auction.html'
     pk_url_kwarg = 'auction_id'
@@ -112,10 +109,10 @@ class AuctionPage(DetailView):
         return Auction.objects.all().select_related('author', 'category', 'buyer')
 
 
-class NewAuction(LoginRequiredMixin, CreateView):
+class NewAuction(LoginMixin, CreateView):
+    """View for creating a new auction."""
     form_class = AuctionForm
     template_name = 'auctions/new.html'
-    login_url = reverse_lazy('login')
 
     def form_valid(self, form):
         new_auction = form.save(commit=False)
@@ -124,6 +121,9 @@ class NewAuction(LoginRequiredMixin, CreateView):
 
 
 class AuctionCategory(DataMixin, ListView):
+    """View for displaying a list of auctions in a specific category."""
+    allow_empty = False
+
     def get_queryset(self):
         return Auction.objects.filter(category__category_name=self.kwargs['category_name'], active=True)
 
@@ -131,11 +131,12 @@ class AuctionCategory(DataMixin, ListView):
         context = super().get_context_data(**kwargs)
         name = self.kwargs['category_name']
         c_def = self.get_user_context(title=name, h2_title=name)
-        return dict(list(context.items()) + list(c_def.items()))
+        context.update(c_def)
+        return context
 
 
-class AuctionWatchlist(LoginRequiredMixin, DataMixin, ListView):
-    login_url = reverse_lazy('login')
+class AuctionWatchlist(LoginMixin, DataMixin, ListView):
+    """View for displaying the user's watchlist."""
 
     def get_queryset(self):
         return self.request.user.watchlist.all()
@@ -143,11 +144,12 @@ class AuctionWatchlist(LoginRequiredMixin, DataMixin, ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(title='Watchlist', h2_title='Watchlist')
-        return dict(list(context.items()) + list(c_def.items()))
+        context.update(c_def)
+        return context
 
 
-class Purchases(LoginRequiredMixin, DataMixin, ListView):
-    login_url = reverse_lazy('login')
+class Purchases(LoginMixin, DataMixin, ListView):
+    """View for displaying a list of auctions that user won."""
 
     def get_queryset(self):
         return Auction.objects.filter(buyer=self.request.user)
@@ -155,74 +157,87 @@ class Purchases(LoginRequiredMixin, DataMixin, ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(title='Purchases', h2_title='Purchases')
-        return dict(list(context.items()) + list(c_def.items()))
+        context.update(c_def)
+        return context
 
 
-@login_required
-def watchlist_edit(request, auction_id):
-    auction = Auction.objects.get(id=auction_id)
+class WatchlistEdit(LoginMixin, View):
+    """View for adding/removing an auction from the user's watchlist."""
+    def get(self, request, auction_id):
+        auction = Auction.objects.get(id=auction_id)
 
-    if request.user in auction.watchers.all():
-        auction.watchers.remove(request.user)
-        auction.is_watched = False
-    else:
-        auction.watchers.add(request.user)
-        auction.is_watched = True
-
-    return HttpResponseRedirect(reverse('auction', args=[auction_id]))
-
-
-@login_required
-def auction_bid(request, auction_id):
-    auction = Auction.objects.get(id=auction_id)
-    amount = Decimal(request.POST['amount'])
-
-    if amount >= auction.starting_bid and (auction.current_bid is None or amount > auction.current_bid):
-        auction.current_bid = amount
-        form = BidForm(request.POST)
-        new_bid = form.save(commit=False)
-        new_bid.auction = auction
-        new_bid.user = request.user
-        if request.user not in auction.watchers.all():
+        if request.user in auction.watchers.all():
+            auction.watchers.remove(request.user)
+            auction.is_watched = False
+        else:
             auction.watchers.add(request.user)
-        new_bid.save()
-        auction.save()
+            auction.is_watched = True
 
         return HttpResponseRedirect(reverse('auction', args=[auction_id]))
-    else:
-        messages.error(request, 'Your bid must be greater than current price.')
-        return HttpResponseRedirect(reverse('auction', args=[auction_id]))
 
 
-@login_required
-def auction_close(request, auction_id):
-    auction = Auction.objects.get(id=auction_id)
+class AuctionBid(LoginMixin, FormView):
+    """View for placing a bid on an auction."""
+    form_class = BidForm
+    template_name = 'auctions/bid.html'
 
-    if request.user == auction.author:
-        auction.active = False
-        if auction.current_bid:
-            auction.buyer = Bid.objects.filter(auction=auction).last().user
-        auction.save()
-        # send(auction.buyer.email)
-        # send_email.delay(auction.buyer.email)
-        return HttpResponseRedirect(reverse('auction', args=[auction_id]))
-    else:
-        auction.watchers.add(request.user)
-        return HttpResponseRedirect(reverse('watchlist'))
+    def form_valid(self, form):
+        auction_id = self.kwargs['auction_id']
+        auction = get_object_or_404(Auction, id=auction_id)
+        amount = Decimal(form.cleaned_data['amount'])
+
+        if amount >= auction.starting_bid and (auction.current_bid is None or amount > auction.current_bid):
+            auction.current_bid = amount
+            new_bid = form.save(commit=False)
+            new_bid.auction = auction
+            new_bid.user = self.request.user
+            if self.request.user not in auction.watchers.all():
+                auction.watchers.add(self.request.user)
+            new_bid.save()
+            auction.save()
+
+            return HttpResponseRedirect(reverse('auction', args=[auction_id]))
+        else:
+            messages.error(self.request, 'Your bid must be greater than the current price.')
+            return HttpResponseRedirect(reverse('auction', args=[auction_id]))
 
 
-@login_required
-def comment(request, auction_id):
-    auction = Auction.objects.get(id=auction_id)
-    form = CommentForm(request.POST)
-    new_comment = form.save(commit=False)
-    new_comment.user = request.user
-    new_comment.auction = auction
-    new_comment.save()
-    return HttpResponseRedirect(reverse('auction', args=[auction_id]))
+class AuctionClose(LoginMixin, View):
+    """View for closing an auction."""
+    def get(self, request, auction_id):
+        auction = get_object_or_404(Auction, id=auction_id)
+
+        if request.user == auction.author:
+            auction.active = False
+            if auction.current_bid:
+                auction.buyer = Bid.objects.filter(auction=auction).last().user
+            auction.save()
+            send(auction.buyer.email)
+            send_email.delay(auction.buyer.email)
+            return HttpResponseRedirect(reverse('auction', args=[auction_id]))
+        else:
+            return HttpResponseForbidden()
+
+
+class CommentCreate(LoginMixin, CreateView):
+    """View for adding a comment to an auction."""
+    model = Comment
+    form_class = CommentForm
+
+    def form_valid(self, form):
+        auction_id = self.kwargs['auction_id']
+        auction = Auction.objects.get(id=auction_id)
+        form.instance.user = self.request.user
+        form.instance.auction = auction
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        auction_id = self.kwargs['auction_id']
+        return reverse('auction', args=[auction_id])
 
 
 class AuctionSearch(DataMixin, ListView):
+    """View for searching auctions based on a query."""
     paginate_by = None
 
     def get_queryset(self):
@@ -233,3 +248,8 @@ class AuctionSearch(DataMixin, ListView):
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(title='Search Results', h2_title='Search Results')
         return dict(list(context.items()) + list(c_def.items()))
+
+
+class PageNotFoundView(View):
+    def dispatch(self, request, *args, **kwargs):
+        return render(request, 'auctions/404.html', status=404)

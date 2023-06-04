@@ -1,4 +1,7 @@
-from .models import *
+from django.urls import reverse_lazy
+
+from .models import Auction, Category
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 class DataMixin:
@@ -12,3 +15,7 @@ class DataMixin:
         categories = Category.objects.all()
         context['categories'] = categories
         return context
+
+
+class LoginMixin(LoginRequiredMixin):
+    login_url = reverse_lazy('login')
