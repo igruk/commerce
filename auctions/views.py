@@ -1,18 +1,19 @@
 from decimal import Decimal
 
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login
+from django.contrib.auth.views import LoginView, LogoutView
 from django.db import IntegrityError
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse, reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView
+from django.views import View
+from django.views.generic import ListView, DetailView, CreateView, FormView
 from django.contrib import messages
 
 # from .service import send
 # from .tasks import send_email
 from .utils import DataMixin, LoginMixin
-from .models import User, Auction, Bid
+from .models import User, Auction, Bid, Comment
 from .forms import CommentForm, BidForm, AuctionForm
 
 
@@ -28,34 +29,25 @@ class AuctionsHome(DataMixin, ListView):
         return Auction.objects.filter(active=True)
 
 
-def login_view(request):
+class MyLoginView(LoginView):
     """View function for user login."""
-    if request.method == 'POST':
+    template_name = 'auctions/login.html'
+    redirect_authenticated_user = True
 
-        # Attempt to sign user in
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
+    def get_success_url(self):
+        return reverse_lazy('index')
 
-        # Check if authentication successful
-        if user is not None:
-            login(request, user)
-            return HttpResponseRedirect(reverse('index'))
-        else:
-            return render(request, 'auctions/login.html', {
-                'message': 'Invalid username and/or password.',
-                'title': 'Log in'
-            })
-    else:
-        return render(request, 'auctions/login.html', {
-            'title': 'Log in'
-        })
+    def form_invalid(self, form):
+        return render(
+            self.request,
+            self.template_name,
+            {'form': form, 'message': 'Invalid username or password.'}
+        )
 
 
-def logout_view(request):
+class MyLogoutView(LoginMixin, LogoutView):
     """View function for user logout."""
-    logout(request)
-    return HttpResponseRedirect(reverse('index'))
+    next_page = reverse_lazy('index')
 
 
 def register(request):
@@ -145,6 +137,7 @@ class AuctionCategory(DataMixin, ListView):
 
 class AuctionWatchlist(LoginMixin, DataMixin, ListView):
     """View for displaying the user's watchlist."""
+
     def get_queryset(self):
         return self.request.user.watchlist.all()
 
@@ -157,6 +150,7 @@ class AuctionWatchlist(LoginMixin, DataMixin, ListView):
 
 class Purchases(LoginMixin, DataMixin, ListView):
     """View for displaying a list of auctions that user won."""
+
     def get_queryset(self):
         return Auction.objects.filter(buyer=self.request.user)
 
@@ -167,72 +161,81 @@ class Purchases(LoginMixin, DataMixin, ListView):
         return context
 
 
-@login_required
-def watchlist_edit(request, auction_id):
+class WatchlistEdit(LoginMixin, View):
     """View for adding/removing an auction from the user's watchlist."""
-    auction = Auction.objects.get(id=auction_id)
 
-    if request.user in auction.watchers.all():
-        auction.watchers.remove(request.user)
-        auction.is_watched = False
-    else:
-        auction.watchers.add(request.user)
-        auction.is_watched = True
+    def get(self, request, auction_id):
+        auction = Auction.objects.get(id=auction_id)
 
-    return HttpResponseRedirect(reverse('auction', args=[auction_id]))
-
-
-@login_required
-def auction_bid(request, auction_id):
-    """View for placing a bid on an auction."""
-    auction = Auction.objects.get(id=auction_id)
-    amount = Decimal(request.POST['amount'])
-
-    if amount >= auction.starting_bid and (auction.current_bid is None or amount > auction.current_bid):
-        auction.current_bid = amount
-        form = BidForm(request.POST)
-        new_bid = form.save(commit=False)
-        new_bid.auction = auction
-        new_bid.user = request.user
-        if request.user not in auction.watchers.all():
+        if request.user in auction.watchers.all():
+            auction.watchers.remove(request.user)
+            auction.is_watched = False
+        else:
             auction.watchers.add(request.user)
-        new_bid.save()
-        auction.save()
+            auction.is_watched = True
 
         return HttpResponseRedirect(reverse('auction', args=[auction_id]))
-    else:
-        messages.error(request, 'Your bid must be greater than current price.')
-        return HttpResponseRedirect(reverse('auction', args=[auction_id]))
 
 
-@login_required
-def auction_close(request, auction_id):
+class AuctionBid(LoginMixin, FormView):
+    """View for placing a bid on an auction."""
+    form_class = BidForm
+    template_name = 'auctions/bid.html'
+
+    def form_valid(self, form):
+        auction_id = self.kwargs['auction_id']
+        auction = get_object_or_404(Auction, id=auction_id)
+        amount = Decimal(form.cleaned_data['amount'])
+
+        if amount >= auction.starting_bid and (auction.current_bid is None or amount > auction.current_bid):
+            auction.current_bid = amount
+            new_bid = form.save(commit=False)
+            new_bid.auction = auction
+            new_bid.user = self.request.user
+            if self.request.user not in auction.watchers.all():
+                auction.watchers.add(self.request.user)
+            new_bid.save()
+            auction.save()
+
+            return HttpResponseRedirect(reverse('auction', args=[auction_id]))
+        else:
+            messages.error(self.request, 'Your bid must be greater than the current price.')
+            return HttpResponseRedirect(reverse('auction', args=[auction_id]))
+
+
+class AuctionClose(LoginMixin, View):
     """View for closing an auction."""
-    auction = Auction.objects.get(id=auction_id)
 
-    if request.user == auction.author:
-        auction.active = False
-        if auction.current_bid:
-            auction.buyer = Bid.objects.filter(auction=auction).last().user
-        auction.save()
-        # send(auction.buyer.email)
-        # send_email.delay(auction.buyer.email)
-        return HttpResponseRedirect(reverse('auction', args=[auction_id]))
-    else:
-        auction.watchers.add(request.user)
-        return HttpResponseRedirect(reverse('watchlist'))
+    def get(self, request, auction_id):
+        auction = get_object_or_404(Auction, id=auction_id)
+
+        if request.user == auction.author:
+            auction.active = False
+            if auction.current_bid:
+                auction.buyer = Bid.objects.filter(auction=auction).last().user
+            auction.save()
+            # send(auction.buyer.email)
+            # send_email.delay(auction.buyer.email)
+            return HttpResponseRedirect(reverse('auction', args=[auction_id]))
+        else:
+            return HttpResponseForbidden()
 
 
-@login_required
-def comment(request, auction_id):
+class CommentCreate(LoginMixin, CreateView):
     """View for adding a comment to an auction."""
-    auction = Auction.objects.get(id=auction_id)
-    form = CommentForm(request.POST)
-    new_comment = form.save(commit=False)
-    new_comment.user = request.user
-    new_comment.auction = auction
-    new_comment.save()
-    return HttpResponseRedirect(reverse('auction', args=[auction_id]))
+    model = Comment
+    form_class = CommentForm
+
+    def form_valid(self, form):
+        auction_id = self.kwargs['auction_id']
+        auction = Auction.objects.get(id=auction_id)
+        form.instance.user = self.request.user
+        form.instance.auction = auction
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        auction_id = self.kwargs['auction_id']
+        return reverse('auction', args=[auction_id])
 
 
 class AuctionSearch(DataMixin, ListView):
